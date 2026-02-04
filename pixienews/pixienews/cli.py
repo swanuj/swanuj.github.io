@@ -1,0 +1,204 @@
+"""CLI interface for PixieNews."""
+
+from __future__ import annotations
+
+import asyncio
+from pathlib import Path
+
+import typer
+from rich.console import Console
+from rich.table import Table
+from loguru import logger
+
+from pixienews.config import Config, COUNTRY_SOURCES
+
+app = typer.Typer(
+    name="pixienews",
+    help="AI News Bot - Get AI news from around the world via WhatsApp",
+)
+console = Console()
+
+
+@app.command()
+def run(
+    bridge_url: str = typer.Option(
+        "ws://localhost:3001",
+        "--bridge", "-b",
+        help="WhatsApp bridge WebSocket URL",
+    ),
+    data_dir: Path = typer.Option(
+        Path.home() / ".pixienews",
+        "--data", "-d",
+        help="Data directory for storing config and user data",
+    ),
+):
+    """Run the PixieNews WhatsApp bot."""
+    from pixienews.bot import PixieNewsBot
+
+    console.print("[bold green]🤖 Starting PixieNews Bot...[/]")
+    console.print(f"📁 Data directory: {data_dir}")
+    console.print(f"🔌 Bridge URL: {bridge_url}")
+
+    config = Config(
+        whatsapp_bridge_url=bridge_url,
+        data_dir=data_dir,
+    )
+
+    bot = PixieNewsBot(config)
+
+    try:
+        asyncio.run(bot.run())
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Shutting down...[/]")
+
+
+@app.command()
+def countries():
+    """List all available countries and their news sources."""
+    table = Table(title="Available Countries")
+    table.add_column("Code", style="cyan", no_wrap=True)
+    table.add_column("Flag", justify="center")
+    table.add_column("Country", style="green")
+    table.add_column("Sources", justify="right", style="magenta")
+
+    for code, info in COUNTRY_SOURCES.items():
+        table.add_row(
+            code,
+            info["flag"],
+            info["name"],
+            str(len(info["sources"])),
+        )
+
+    console.print(table)
+
+
+@app.command()
+def news(
+    country: str = typer.Argument("GLOBAL", help="Country code (US, UK, IN, etc.)"),
+    limit: int = typer.Option(5, "--limit", "-n", help="Number of articles"),
+):
+    """Fetch AI news for a country (CLI mode)."""
+    from pixienews.scrapers import NewsScraper
+
+    country = country.upper()
+    if country not in COUNTRY_SOURCES:
+        console.print(f"[red]Unknown country: {country}[/]")
+        console.print("Use 'pixienews countries' to see available codes.")
+        raise typer.Exit(1)
+
+    info = COUNTRY_SOURCES[country]
+    console.print(f"\n{info['flag']} [bold]AI News from {info['name']}[/]\n")
+
+    async def fetch():
+        async with NewsScraper() as scraper:
+            return await scraper.get_news(country, limit=limit)
+
+    articles = asyncio.run(fetch())
+
+    if not articles:
+        console.print("[yellow]No recent news found.[/]")
+        return
+
+    for i, article in enumerate(articles, 1):
+        console.print(f"[bold cyan]{i}. {article.title}[/]")
+        console.print(f"   📰 {article.source} | 📅 {article.published.strftime('%Y-%m-%d')}")
+        if article.summary:
+            summary = article.summary[:200] + "..." if len(article.summary) > 200 else article.summary
+            console.print(f"   [dim]{summary}[/]")
+        console.print(f"   🔗 {article.url}\n")
+
+
+@app.command()
+def search(
+    query: str = typer.Argument(..., help="Search query"),
+    limit: int = typer.Option(10, "--limit", "-n", help="Number of results"),
+):
+    """Search AI news across all countries."""
+    from pixienews.scrapers import NewsScraper
+
+    console.print(f"\n🔍 [bold]Searching for: {query}[/]\n")
+
+    async def do_search():
+        async with NewsScraper() as scraper:
+            return await scraper.search_news(query, limit=limit)
+
+    articles = asyncio.run(do_search())
+
+    if not articles:
+        console.print("[yellow]No results found.[/]")
+        return
+
+    for i, article in enumerate(articles, 1):
+        info = COUNTRY_SOURCES.get(article.country, {})
+        flag = info.get("flag", "📰")
+        console.print(f"[bold cyan]{i}. {flag} {article.title}[/]")
+        console.print(f"   📰 {article.source} ({article.country})")
+        console.print(f"   🔗 {article.url}\n")
+
+
+@app.command()
+def setup():
+    """Interactive setup for PixieNews."""
+    console.print("[bold]🔧 PixieNews Setup[/]\n")
+
+    # Create config
+    config = Config()
+    config.data_dir.mkdir(parents=True, exist_ok=True)
+
+    console.print("1. Install the WhatsApp bridge:")
+    console.print("   [cyan]cd pixienews/bridge && npm install[/]")
+    console.print("")
+    console.print("2. Start the WhatsApp bridge:")
+    console.print("   [cyan]node server.js[/]")
+    console.print("")
+    console.print("3. Scan the QR code with your WhatsApp")
+    console.print("")
+    console.print("4. Start the bot:")
+    console.print("   [cyan]pixienews run[/]")
+    console.print("")
+
+    config.save()
+    console.print(f"[green]✓ Config saved to {config.data_dir / 'config.json'}[/]")
+
+
+@app.command()
+def bridge():
+    """Show instructions for setting up the WhatsApp bridge."""
+    console.print("""
+[bold]WhatsApp Bridge Setup[/]
+
+The PixieNews bot connects to WhatsApp through a Node.js bridge using whatsapp-web.js.
+
+[bold cyan]Prerequisites:[/]
+• Node.js >= 18
+• npm or yarn
+
+[bold cyan]Installation:[/]
+1. Navigate to the bridge directory:
+   [green]cd pixienews/bridge[/]
+
+2. Install dependencies:
+   [green]npm install[/]
+
+3. Start the bridge:
+   [green]node server.js[/]
+
+4. Scan the QR code with WhatsApp:
+   • Open WhatsApp on your phone
+   • Go to Settings > Linked Devices
+   • Tap "Link a Device"
+   • Scan the QR code shown in terminal
+
+[bold cyan]Running the Bot:[/]
+Once the bridge is connected, start PixieNews:
+   [green]pixienews run[/]
+
+[bold cyan]Notes:[/]
+• The bridge runs on ws://localhost:3001 by default
+• Session data is stored in bridge/.wwebjs_auth/
+• Keep the bridge running for the bot to work
+""")
+
+
+if __name__ == "__main__":
+    app()
