@@ -162,12 +162,65 @@ def setup():
 
 
 @app.command()
-def bridge():
-    """Show instructions for setting up the WhatsApp bridge."""
-    console.print("""
-[bold]WhatsApp Bridge Setup[/]
+def webhook(
+    host: str = typer.Option("0.0.0.0", "--host", "-h", help="Host to bind to"),
+    port: int = typer.Option(8000, "--port", "-p", help="Port to listen on"),
+    debug: bool = typer.Option(False, "--debug", help="Enable debug logging"),
+):
+    """Run the WhatsApp Business API webhook server.
 
-The PixieNews bot connects to WhatsApp through a Node.js bridge using whatsapp-web.js.
+    This is the RECOMMENDED method for creating a real WhatsApp bot.
+
+    Required environment variables:
+    - WHATSAPP_PHONE_NUMBER_ID: Your phone number ID from Meta
+    - WHATSAPP_ACCESS_TOKEN: Your access token from Meta
+    - WHATSAPP_VERIFY_TOKEN: Your custom verify token
+
+    Example:
+        export WHATSAPP_PHONE_NUMBER_ID="123456789"
+        export WHATSAPP_ACCESS_TOKEN="EAAxxxx..."
+        export WHATSAPP_VERIFY_TOKEN="my_secret_token"
+        pixienews webhook --port 8000
+    """
+    import os
+
+    if debug:
+        logger.enable("pixienews")
+
+    # Check for required environment variables
+    phone_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+    access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
+    verify_token = os.getenv("WHATSAPP_VERIFY_TOKEN")
+
+    if not phone_id or not access_token:
+        console.print("[bold red]Missing required environment variables![/]\n")
+        console.print("Please set the following:")
+        console.print("  [cyan]export WHATSAPP_PHONE_NUMBER_ID='your_phone_id'[/]")
+        console.print("  [cyan]export WHATSAPP_ACCESS_TOKEN='your_token'[/]")
+        console.print("  [cyan]export WHATSAPP_VERIFY_TOKEN='your_verify_token'[/]")
+        console.print("\nSee README.md for setup instructions.")
+        raise typer.Exit(1)
+
+    console.print("[bold green]🚀 Starting PixieNews Webhook Server...[/]")
+    console.print(f"📍 Listening on: http://{host}:{port}")
+    console.print(f"🔗 Webhook URL: http://{host}:{port}/webhook")
+    console.print(f"✅ Verify Token: {verify_token or 'pixienews_verify'}")
+    console.print("\n[yellow]Configure this URL in your Meta Dashboard![/]\n")
+
+    from pixienews.webhook_server import run_server
+    run_server(host=host, port=port)
+
+
+@app.command()
+def bridge():
+    """Show instructions for setting up the WhatsApp bridge (Method 2 - Personal use)."""
+    console.print("""
+[bold]WhatsApp Bridge Setup (Personal Use)[/]
+
+[yellow]⚠️  This method links YOUR WhatsApp account (like WhatsApp Web).
+    The bot responds AS YOU, not as a separate bot.[/]
+
+For a REAL bot, use: [green]pixienews webhook[/] (WhatsApp Business API)
 
 [bold cyan]Prerequisites:[/]
 • Node.js >= 18

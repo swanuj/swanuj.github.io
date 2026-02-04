@@ -16,37 +16,150 @@ Users can select their preferred country and receive curated AI news directly in
 
 ---
 
-## Quick Start
+## ⚠️ Two WhatsApp Integration Methods
+
+### Method 1: WhatsApp Business API (RECOMMENDED) ✅
+- **Creates a REAL bot** with its own phone number
+- Users message YOUR BOT, bot responds
+- Official, supported by Meta
+- Requires: Meta Business account + Phone number
+
+### Method 2: WhatsApp Web Bridge (Personal Use)
+- Links YOUR personal WhatsApp (like WhatsApp Web)
+- Bot responds AS YOU (using your number)
+- Unofficial, may break
+- Good for personal/testing use
+
+---
+
+# 🚀 Method 1: WhatsApp Business API Setup (Recommended)
+
+This creates a **real WhatsApp bot** that users can add and message.
+
+## Step 1: Create Meta Business Account
+
+1. Go to [Meta for Developers](https://developers.facebook.com/)
+2. Click **My Apps** → **Create App**
+3. Select **Business** → **Next**
+4. Fill in app name: `PixieNews Bot`
+5. Create the app
+
+## Step 2: Set Up WhatsApp Business
+
+1. In your app dashboard, click **Add Product**
+2. Find **WhatsApp** → Click **Set Up**
+3. You'll get a **Test Phone Number** (free for testing)
+
+## Step 3: Get Your Credentials
+
+From the WhatsApp dashboard, note down:
+- **Phone Number ID**: `1234567890123456`
+- **Access Token**: `EAAxxxxxxx...`
+- **Verify Token**: Create your own (e.g., `pixienews_secret_123`)
+
+## Step 4: Install & Configure PixieNews
+
+```bash
+# Clone and install
+git clone https://github.com/your-repo/pixienews.git
+cd pixienews
+pip install -e ".[full]"
+
+# Set environment variables
+export WHATSAPP_PHONE_NUMBER_ID="your_phone_number_id"
+export WHATSAPP_ACCESS_TOKEN="your_access_token"
+export WHATSAPP_VERIFY_TOKEN="pixienews_secret_123"
+```
+
+## Step 5: Start the Webhook Server
+
+```bash
+# Start the server (default port 8000)
+pixienews webhook
+
+# Or with custom port
+pixienews webhook --port 8080
+```
+
+## Step 6: Expose Your Server (for Meta to reach you)
+
+Use **ngrok** (easiest for testing):
+
+```bash
+# Install ngrok
+brew install ngrok  # or download from ngrok.com
+
+# Expose your server
+ngrok http 8000
+```
+
+You'll get a URL like: `https://abc123.ngrok.io`
+
+## Step 7: Configure Webhook in Meta Dashboard
+
+1. Go to **WhatsApp** → **Configuration**
+2. Click **Edit** under Webhooks
+3. Enter:
+   - **Callback URL**: `https://abc123.ngrok.io/webhook`
+   - **Verify Token**: `pixienews_secret_123`
+4. Click **Verify and Save**
+5. Under **Webhook Fields**, subscribe to:
+   - `messages`
+
+## Step 8: Test Your Bot!
+
+1. In Meta Dashboard, go to **WhatsApp** → **API Setup**
+2. Add your phone number as a recipient
+3. Send a message to the test number
+4. Or use the **Send Message** button to send yourself a template first
+
+### How Users Interact:
+
+```
+User sends: /start
+Bot replies: 🤖 Welcome to PixieNews! ...
+
+User sends: US
+Bot replies: 🇺🇸 AI News from United States
+             1. OpenAI announces GPT-5...
+             2. Google DeepMind...
+
+User sends: /search ChatGPT
+Bot replies: 🔍 Search Results for: ChatGPT
+             1. ChatGPT hits 200M users...
+```
+
+---
+
+# 🔧 Method 2: WhatsApp Web Bridge (Personal Use)
+
+This links YOUR WhatsApp account (like WhatsApp Web). The bot responds AS YOU.
+
+⚠️ **Note**: This is NOT a separate bot. It's YOUR account automated.
+
+## Setup
 
 ### 1. Install PixieNews
 
 ```bash
-# Clone the repository
 git clone https://github.com/your-repo/pixienews.git
 cd pixienews
-
-# Install Python package
 pip install -e .
 ```
 
 ### 2. Set Up WhatsApp Bridge
 
 ```bash
-# Navigate to bridge directory
 cd bridge
-
-# Install Node.js dependencies (requires Node.js >= 18)
 npm install
-
-# Start the bridge
 node server.js
 ```
 
-### 3. Connect WhatsApp
+### 3. Scan QR Code
 
-1. A QR code will appear in the terminal
-2. Open WhatsApp on your phone
-3. Go to **Settings → Linked Devices → Link a Device**
+1. A QR code appears in terminal
+2. Open WhatsApp → **Settings** → **Linked Devices**
+3. Tap **Link a Device**
 4. Scan the QR code
 
 ### 4. Start the Bot
@@ -56,7 +169,9 @@ node server.js
 pixienews run
 ```
 
-That's it! Send `/start` to your WhatsApp to begin.
+### 5. Test
+
+Send a message FROM ANOTHER PHONE to your WhatsApp number.
 
 ---
 
@@ -79,132 +194,28 @@ That's it! Send `/start` to your WhatsApp to begin.
 
 ---
 
-## Detailed WhatsApp Integration Guide
+## Architecture
 
-### Architecture
-
+### Method 1: WhatsApp Business API
 ```
-┌─────────────────┐     WebSocket      ┌──────────────────┐
-│   PixieNews     │◄──────────────────►│  WhatsApp Bridge │
-│   (Python)      │    ws://3001       │    (Node.js)     │
-└─────────────────┘                    └────────┬─────────┘
-                                                │
-                                                │ WhatsApp Web
-                                                │ Protocol
-                                                ▼
-                                       ┌──────────────────┐
-                                       │   WhatsApp       │
-                                       │   Servers        │
-                                       └──────────────────┘
+┌─────────────┐    HTTPS     ┌─────────────┐     API      ┌──────────────┐
+│   Users     │◄────────────►│   Meta      │◄────────────►│  PixieNews   │
+│  WhatsApp   │              │  Servers    │   Webhook    │   Server     │
+└─────────────┘              └─────────────┘              └──────────────┘
+                                                                │
+                                                                ▼
+                                                         ┌──────────────┐
+                                                         │ News Scraper │
+                                                         └──────────────┘
 ```
 
-### Step-by-Step Setup
-
-#### Prerequisites
-
-- **Python 3.11+** - For the main bot
-- **Node.js 18+** - For the WhatsApp bridge
-- **A WhatsApp account** - To link as a device
-
-#### Step 1: Install Dependencies
-
-```bash
-# Python dependencies
-pip install pixienews[full]
-
-# Or install from source
-pip install httpx beautifulsoup4 feedparser websocket-client pydantic loguru apscheduler rich typer
+### Method 2: WhatsApp Web Bridge
 ```
-
-#### Step 2: Configure the Bridge
-
-The bridge uses `whatsapp-web.js` which automates WhatsApp Web.
-
-```bash
-cd pixienews/bridge
-npm install
-```
-
-**Important Files:**
-- `bridge/server.js` - The WebSocket server
-- `bridge/.wwebjs_auth/` - Session data (created after first login)
-
-#### Step 3: First-Time Authentication
-
-```bash
-# Start the bridge
-node server.js
-```
-
-You'll see:
-```
-🚀 Starting WhatsApp client...
-📁 Session data will be stored in: ./.wwebjs_auth
-🔌 WebSocket server started on port 3001
-
-📱 Scan this QR code with WhatsApp:
-
-▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-█ ▄▄▄▄▄ █▄▀▄█...
-...
-```
-
-1. Open WhatsApp on your phone
-2. Go to **Settings** (⚙️)
-3. Tap **Linked Devices**
-4. Tap **Link a Device**
-5. Scan the QR code
-
-After scanning:
-```
-✅ WhatsApp authenticated
-✅ WhatsApp client is ready!
-📞 Connected as: 1234567890
-```
-
-#### Step 4: Run the Bot
-
-In a new terminal:
-
-```bash
-pixienews run
-```
-
-Output:
-```
-🤖 Starting PixieNews Bot...
-📁 Data directory: /home/user/.pixienews
-🔌 Bridge URL: ws://localhost:3001
-Connected to WhatsApp bridge
-Waiting for messages...
-```
-
-#### Step 5: Test It!
-
-Send a message to your WhatsApp number:
-- `/start` - See welcome message
-- `US` - Get US AI news
-- `/search ChatGPT` - Search for ChatGPT news
-
----
-
-## CLI Usage (Without WhatsApp)
-
-You can also use PixieNews from the command line:
-
-```bash
-# Get news for a country
-pixienews news US
-pixienews news IN --limit 10
-
-# Search news
-pixienews search "OpenAI GPT"
-
-# List countries
-pixienews countries
-
-# Setup guide
-pixienews setup
+┌─────────────┐    WA Web    ┌─────────────┐  WebSocket   ┌──────────────┐
+│   Your      │◄────────────►│  WhatsApp   │◄────────────►│  PixieNews   │
+│   Phone     │              │  Bridge     │              │    Bot       │
+└─────────────┘              │  (Node.js)  │              └──────────────┘
+                             └─────────────┘
 ```
 
 ---
@@ -227,152 +238,97 @@ pixienews setup
 
 ---
 
-## Configuration
-
-Config file: `~/.pixienews/config.json`
-
-```json
-{
-  "whatsapp_bridge_url": "ws://localhost:3001",
-  "scrape_interval_minutes": 30,
-  "max_news_per_source": 10,
-  "cache_ttl_minutes": 15,
-  "data_dir": "/home/user/.pixienews"
-}
-```
-
-### Environment Variables
+## CLI Usage (Without WhatsApp)
 
 ```bash
-export PIXIENEWS_BRIDGE_URL="ws://localhost:3001"
-export PIXIENEWS_DATA_DIR="/path/to/data"
+# Get news for a country
+pixienews news US
+pixienews news IN --limit 10
+
+# Search news
+pixienews search "OpenAI GPT"
+
+# List countries
+pixienews countries
+
+# Run webhook server (Business API)
+pixienews webhook --port 8000
+
+# Run bridge bot (Web method)
+pixienews run
 ```
 
 ---
 
-## Deployment
+## Deployment (Production)
 
-### Running as a Service (systemd)
-
-Create `/etc/systemd/system/pixienews-bridge.service`:
-
-```ini
-[Unit]
-Description=PixieNews WhatsApp Bridge
-After=network.target
-
-[Service]
-Type=simple
-User=pixienews
-WorkingDirectory=/opt/pixienews/bridge
-ExecStart=/usr/bin/node server.js
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Create `/etc/systemd/system/pixienews.service`:
-
-```ini
-[Unit]
-Description=PixieNews Bot
-After=network.target pixienews-bridge.service
-Requires=pixienews-bridge.service
-
-[Service]
-Type=simple
-User=pixienews
-ExecStart=/usr/local/bin/pixienews run
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Enable and start:
+### For WhatsApp Business API:
 
 ```bash
-sudo systemctl enable pixienews-bridge pixienews
-sudo systemctl start pixienews-bridge pixienews
+# Using Docker
+docker build -t pixienews .
+docker run -d \
+  -e WHATSAPP_PHONE_NUMBER_ID=xxx \
+  -e WHATSAPP_ACCESS_TOKEN=xxx \
+  -e WHATSAPP_VERIFY_TOKEN=xxx \
+  -p 8000:8000 \
+  pixienews webhook
+
+# Using systemd
+sudo cp pixienews.service /etc/systemd/system/
+sudo systemctl enable pixienews
+sudo systemctl start pixienews
 ```
 
-### Docker Deployment
+### Reverse Proxy (nginx):
 
-```dockerfile
-# Dockerfile
-FROM python:3.11-slim
+```nginx
+server {
+    listen 443 ssl;
+    server_name pixienews.yourdomain.com;
 
-WORKDIR /app
-COPY . .
+    ssl_certificate /etc/ssl/certs/your_cert.pem;
+    ssl_certificate_key /etc/ssl/private/your_key.pem;
 
-RUN pip install -e .
-
-CMD ["pixienews", "run", "--bridge", "ws://bridge:3001"]
+    location /webhook {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
 ```
 
-```yaml
-# docker-compose.yml
-version: '3.8'
+---
 
-services:
-  bridge:
-    build: ./bridge
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./bridge/.wwebjs_auth:/app/.wwebjs_auth
+## Environment Variables
 
-  bot:
-    build: .
-    depends_on:
-      - bridge
-    volumes:
-      - pixienews-data:/root/.pixienews
-
-volumes:
-  pixienews-data:
-```
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `WHATSAPP_PHONE_NUMBER_ID` | Meta Phone Number ID | Yes (API) |
+| `WHATSAPP_ACCESS_TOKEN` | Meta Access Token | Yes (API) |
+| `WHATSAPP_VERIFY_TOKEN` | Webhook verify token | Yes (API) |
+| `WHATSAPP_WEBHOOK_SECRET` | Signature validation | Optional |
+| `PIXIENEWS_DATA_DIR` | Data storage path | Optional |
 
 ---
 
 ## Troubleshooting
 
-### QR Code Not Appearing
-- Make sure Node.js >= 18 is installed
-- Delete `.wwebjs_auth/` and restart the bridge
+### Webhook Not Verified
+- Check your `WHATSAPP_VERIFY_TOKEN` matches Meta dashboard
+- Ensure your server is publicly accessible (use ngrok for testing)
 
-### Bot Not Responding
-- Check if the bridge is running: `node server.js`
-- Ensure WebSocket connection on port 3001
-- Check logs: `pixienews run --debug`
+### No Messages Received
+- Subscribe to `messages` in webhook fields
+- Check your server logs: `pixienews webhook --debug`
 
-### WhatsApp Disconnects Frequently
-- WhatsApp Web sessions expire after inactivity
-- Keep the bridge running continuously
-- Use systemd or PM2 for process management
+### QR Code Issues (Web method)
+- Delete `bridge/.wwebjs_auth/` and restart
+- Ensure Node.js >= 18
 
-### No News Found
-- Some RSS feeds may be down temporarily
-- Try `/global` for international sources
-- Check internet connectivity
-
----
-
-## Development
-
-```bash
-# Install dev dependencies
-pip install -e ".[dev]"
-
-# Run tests
-pytest
-
-# Lint code
-ruff check pixienews
-```
+### Rate Limited
+- WhatsApp has rate limits on messages
+- Use template messages for first contact
 
 ---
 
@@ -385,7 +341,8 @@ MIT License - Feel free to use and modify!
 ## Credits
 
 Built with:
-- [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js) - WhatsApp Web API
+- [Meta Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api) - Official WhatsApp API
+- [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js) - WhatsApp Web automation
+- [FastAPI](https://fastapi.tiangolo.com/) - Webhook server
 - [feedparser](https://feedparser.readthedocs.io/) - RSS parsing
 - [httpx](https://www.python-httpx.org/) - Async HTTP
-- [Typer](https://typer.tiangolo.com/) - CLI framework

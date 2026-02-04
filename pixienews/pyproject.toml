@@ -25,6 +25,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+full = [
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+]
 dev = ["pytest>=7.0.0", "ruff>=0.1.0"]
 
 [project.scripts]
