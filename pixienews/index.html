@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixieNews - AI News Bot for WhatsApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .hero .tagline {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .hero .emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        /* Feature Cards */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 40px 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Countries Section */
+        .countries {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .countries h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .country-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .country-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: background 0.3s ease;
+        }
+
+        .country-item:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .country-item .flag {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .country-item .code {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .country-item .name {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Demo Section */
+        .demo {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .demo h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+
+        .chat-demo {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #e5ddd5;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 0.95rem;
+        }
+
+        .chat-bubble {
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+
+        .user-msg {
+            background: #dcf8c6;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+
+        .bot-msg {
+            background: white;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+
+        /* Commands Section */
+        .commands {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            color: white;
+        }
+
+        .commands h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .command-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .command-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+
+        .command-item .cmd {
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        .command-item .desc {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* CTA Section */
+        .cta {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        footer a {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero .tagline {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="emoji">🤖📰</div>
+            <h1>PixieNews</h1>
+            <p class="tagline">AI News from Around the World - Delivered to WhatsApp</p>
+        </section>
+
+        <!-- Features -->
+        <section class="features">
+            <div class="feature-card">
+                <div class="icon">🌍</div>
+                <h3>10+ Countries</h3>
+                <p>Get AI news from USA, UK, India, China, Germany, Japan, France, Korea, Canada, Australia, and global sources.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📰</div>
+                <h3>Multiple Sources</h3>
+                <p>Aggregates from TechCrunch, VentureBeat, BBC, MIT Tech Review, Analytics India, and 20+ more sources.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">💬</div>
+                <h3>WhatsApp Delivery</h3>
+                <p>Receive curated AI news directly in your WhatsApp. Just send a country code to get started!</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔍</div>
+                <h3>Smart Search</h3>
+                <p>Search for specific topics like "ChatGPT", "OpenAI", or "robotics" across all news sources.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚡</div>
+                <h3>Real-Time Updates</h3>
+                <p>Fresh news with intelligent caching. Subscribe for daily AI news digest delivered every morning.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🎯</div>
+                <h3>Personalized</h3>
+                <p>Set your preferred country and get news tailored to your region. Your preferences are saved.</p>
+            </div>
+        </section>
+
+        <!-- Countries -->
+        <section class="countries">
+            <h2>Available Countries</h2>
+            <div class="country-grid">
+                <div class="country-item">
+                    <span class="flag">🇺🇸</span>
+                    <span class="code">US</span>
+                    <span class="name">United States</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🇬🇧</span>
+                    <span class="code">UK</span>
+                    <span class="name">United Kingdom</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🇮🇳</span>
+                    <span class="code">IN</span>
+                    <span class="name">India</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🇨🇳</span>
+                    <span class="code">CN</span>
+                    <span class="name">China</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🇩🇪</span>
+                    <span class="code">DE</span>
+                    <span class="name">Germany</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🇯🇵</span>
+                    <span class="code">JP</span>
+                    <span class="name">Japan</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🇫🇷</span>
+                    <span class="code">FR</span>
+                    <span class="name">France</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🇰🇷</span>
+                    <span class="code">KR</span>
+                    <span class="name">South Korea</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🇨🇦</span>
+                    <span class="code">CA</span>
+                    <span class="name">Canada</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🇦🇺</span>
+                    <span class="code">AU</span>
+                    <span class="name">Australia</span>
+                </div>
+                <div class="country-item">
+                    <span class="flag">🌍</span>
+                    <span class="code">GLOBAL</span>
+                    <span class="name">International</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo -->
+        <section class="demo">
+            <h2>How It Works</h2>
+            <div class="chat-demo">
+                <div class="chat-bubble user-msg">US</div>
+                <div class="chat-bubble bot-msg">
+                    🇺🇸 <strong>AI News from United States</strong><br><br>
+                    <strong>1. OpenAI Releases GPT-5</strong><br>
+                    📰 TechCrunch | 📅 Feb 4<br>
+                    <em>The next generation model shows unprecedented reasoning...</em><br><br>
+                    <strong>2. Google DeepMind Achieves AGI Milestone</strong><br>
+                    📰 VentureBeat | 📅 Feb 4
+                </div>
+                <div class="chat-bubble user-msg">/search robotics</div>
+                <div class="chat-bubble bot-msg">
+                    🔍 <strong>Search Results: robotics</strong><br><br>
+                    1. 🇺🇸 Tesla Optimus Robot Now in Production<br>
+                    2. 🇯🇵 Japan's Humanoid Revolution<br>
+                    3. 🇨🇳 China Leads Industrial Robotics
+                </div>
+            </div>
+        </section>
+
+        <!-- Commands -->
+        <section class="commands">
+            <h2>WhatsApp Commands</h2>
+            <div class="command-list">
+                <div class="command-item">
+                    <span class="cmd">/start</span>
+                    <div class="desc">Welcome message & quick start</div>
+                </div>
+                <div class="command-item">
+                    <span class="cmd">/countries</span>
+                    <div class="desc">List all available countries</div>
+                </div>
+                <div class="command-item">
+                    <span class="cmd">/set US</span>
+                    <div class="desc">Set your default country</div>
+                </div>
+                <div class="command-item">
+                    <span class="cmd">/news</span>
+                    <div class="desc">Get news for your country</div>
+                </div>
+                <div class="command-item">
+                    <span class="cmd">/news UK</span>
+                    <div class="desc">Get news for specific country</div>
+                </div>
+                <div class="command-item">
+                    <span class="cmd">/global</span>
+                    <div class="desc">Get international AI news</div>
+                </div>
+                <div class="command-item">
+                    <span class="cmd">/search GPT</span>
+                    <div class="desc">Search news by keyword</div>
+                </div>
+                <div class="command-item">
+                    <span class="cmd">/subscribe</span>
+                    <div class="desc">Daily news updates</div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 20px; color: #94a3b8;">
+                💡 <strong>Quick tip:</strong> Just type a country code (US, UK, IN, etc.) to get news instantly!
+            </p>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta">
+            <h2>Get Started</h2>
+            <p style="margin-bottom: 30px; opacity: 0.9;">Deploy your own PixieNews bot in minutes</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/swanuj/swanuj.github.io/tree/main/pixienews" class="btn btn-primary">View on GitHub</a>
+                <a href="https://github.com/swanuj/swanuj.github.io/tree/main/pixienews#-method-1-whatsapp-business-api-setup-recommended" class="btn btn-secondary">Setup Guide</a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Built with Python & FastAPI | <a href="https://github.com/swanuj/swanuj.github.io/tree/main/pixienews">GitHub</a></p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">Inspired by <a href="https://github.com/HKUDS/nanobot">HKUDS/nanobot</a></p>
+        </footer>
+    </div>
+</body>
+</html>
