@@ -14,7 +14,7 @@ from pixienews.config import Config, COUNTRY_SOURCES
 
 app = typer.Typer(
     name="pixienews",
-    help="AI News Bot - Get AI news from around the world via WhatsApp",
+    help="AI News Bot - Get AI news from around the world via Telegram or WhatsApp",
 )
 console = Console()
 
@@ -209,6 +209,73 @@ def webhook(
 
     from pixienews.webhook_server import run_server
     run_server(host=host, port=port)
+
+
+@app.command()
+def telegram(
+    token: str = typer.Option(
+        None,
+        "--token", "-t",
+        envvar="TELEGRAM_BOT_TOKEN",
+        help="Telegram bot token from @BotFather",
+    ),
+    data_dir: Path = typer.Option(
+        Path.home() / ".pixienews",
+        "--data", "-d",
+        help="Data directory for storing user data",
+    ),
+):
+    """Run PixieNews as a Telegram bot (EASIEST METHOD!).
+
+    This is the simplest way to deploy PixieNews!
+
+    Setup in 2 minutes:
+    1. Message @BotFather on Telegram
+    2. Send /newbot and follow instructions
+    3. Copy the token
+    4. Run: pixienews telegram --token YOUR_TOKEN
+
+    Or set environment variable:
+        export TELEGRAM_BOT_TOKEN="your_token"
+        pixienews telegram
+    """
+    if not token:
+        console.print("[bold red]Missing Telegram bot token![/]\n")
+        console.print("[bold]How to get a token (2 minutes):[/]")
+        console.print("1. Open Telegram and message [cyan]@BotFather[/]")
+        console.print("2. Send [cyan]/newbot[/]")
+        console.print("3. Choose a name (e.g., 'My AI News Bot')")
+        console.print("4. Choose a username (e.g., 'myainews_bot')")
+        console.print("5. Copy the token you receive")
+        console.print("")
+        console.print("[bold]Then run:[/]")
+        console.print("  [green]pixienews telegram --token YOUR_TOKEN[/]")
+        console.print("")
+        console.print("[bold]Or set environment variable:[/]")
+        console.print("  [green]export TELEGRAM_BOT_TOKEN='your_token'[/]")
+        console.print("  [green]pixienews telegram[/]")
+        raise typer.Exit(1)
+
+    try:
+        from pixienews.channels.telegram import TelegramBot
+    except ImportError:
+        console.print("[bold red]python-telegram-bot is required![/]")
+        console.print("Install with: [cyan]pip install 'pixienews[telegram]'[/]")
+        raise typer.Exit(1)
+
+    console.print("[bold green]🤖 Starting PixieNews Telegram Bot...[/]")
+    console.print(f"📁 Data directory: {data_dir}")
+    console.print("")
+    console.print("[bold]Your bot is now running![/]")
+    console.print("Open Telegram and send [cyan]/start[/] to your bot.")
+    console.print("")
+
+    bot = TelegramBot(token=token, data_dir=str(data_dir))
+
+    try:
+        bot.run_sync()
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Shutting down...[/]")
 
 
 @app.command()

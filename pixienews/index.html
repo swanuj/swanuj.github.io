@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PixieNews - AI News Bot for WhatsApp</title>
+    <title>PixieNews - AI News Bot for Telegram & WhatsApp</title>
     <style>
         * {
             margin: 0;
@@ -290,7 +290,7 @@
         <section class="hero">
             <div class="emoji">🤖📰</div>
             <h1>PixieNews</h1>
-            <p class="tagline">AI News from Around the World - Delivered to WhatsApp</p>
+            <p class="tagline">AI News from Around the World - Delivered to Telegram & WhatsApp</p>
         </section>
 
         <!-- Features -->
@@ -454,13 +454,52 @@
             </p>
         </section>
 
+        <!-- Deployment Options -->
+        <section class="countries" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white;">
+            <h2 style="color: white;">Choose Your Platform</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                <!-- Telegram Option -->
+                <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 16px; border: 2px solid #0088cc;">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">📱</div>
+                    <h3 style="color: #0088cc; font-size: 1.5rem; margin-bottom: 10px;">Telegram Bot</h3>
+                    <div style="background: #0088cc; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-size: 0.9rem;">
+                        ⚡ EASIEST - 2 MINUTES
+                    </div>
+                    <p style="color: #94a3b8; margin-bottom: 20px;">Free, no verification needed. Just get a token from @BotFather!</p>
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.85rem; text-align: left;">
+                        <div style="color: #4ade80;">1. Message @BotFather</div>
+                        <div style="color: #4ade80;">2. Send /newbot</div>
+                        <div style="color: #4ade80;">3. Copy your token</div>
+                        <div style="color: #60a5fa; margin-top: 10px;">$ pip install pixienews[telegram]</div>
+                        <div style="color: #60a5fa;">$ pixienews telegram --token YOUR_TOKEN</div>
+                    </div>
+                </div>
+                <!-- WhatsApp Option -->
+                <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 16px; border: 2px solid #25d366;">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">💬</div>
+                    <h3 style="color: #25d366; font-size: 1.5rem; margin-bottom: 10px;">WhatsApp Business</h3>
+                    <div style="background: #25d366; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-size: 0.9rem;">
+                        🏢 OFFICIAL API
+                    </div>
+                    <p style="color: #94a3b8; margin-bottom: 20px;">Real WhatsApp bot with own number. Requires Meta Business account.</p>
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.85rem; text-align: left;">
+                        <div style="color: #f59e0b;">1. Create Meta Developer App</div>
+                        <div style="color: #f59e0b;">2. Add WhatsApp Product</div>
+                        <div style="color: #f59e0b;">3. Get Phone ID & Token</div>
+                        <div style="color: #60a5fa; margin-top: 10px;">$ pip install pixienews[whatsapp]</div>
+                        <div style="color: #60a5fa;">$ pixienews webhook --port 8000</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- CTA -->
         <section class="cta">
             <h2>Get Started</h2>
             <p style="margin-bottom: 30px; opacity: 0.9;">Deploy your own PixieNews bot in minutes</p>
             <div class="cta-buttons">
                 <a href="https://github.com/swanuj/swanuj.github.io/tree/main/pixienews" class="btn btn-primary">View on GitHub</a>
-                <a href="https://github.com/swanuj/swanuj.github.io/tree/main/pixienews#-method-1-whatsapp-business-api-setup-recommended" class="btn btn-secondary">Setup Guide</a>
+                <a href="https://github.com/swanuj/swanuj.github.io/tree/main/pixienews#readme" class="btn btn-secondary">Full Documentation</a>
             </div>
         </section>
 

@@ -1,38 +1,86 @@
 # PixieNews 🤖📰
 
-**AI News Bot** - A lightweight bot that scrapes AI/ML news from around the world and delivers it via WhatsApp.
+**AI News Bot** - A lightweight bot that scrapes AI/ML news from around the world and delivers it via **Telegram** or **WhatsApp**.
 
-Users can select their preferred country and receive curated AI news directly in their WhatsApp chat.
+Users can select their preferred country and receive curated AI news directly in their chat.
 
 ## Features
 
 - 🌍 **10+ Countries** - US, UK, India, China, Germany, Japan, France, Korea, Canada, Australia + Global
 - 📰 **Multiple Sources** - Aggregates from TechCrunch, VentureBeat, BBC, Analytics India, and more
 - 🔍 **Smart Search** - Search AI news across all sources
-- 💬 **WhatsApp Integration** - Get news delivered to your WhatsApp
+- 📱 **Telegram Bot** - Easy setup in 2 minutes!
+- 💬 **WhatsApp Integration** - Official Business API support
 - ⚡ **Lightweight** - Minimal dependencies, fast execution
 - 🔄 **Real-time** - Fresh news with intelligent caching
-- 📱 **User Preferences** - Set your default country
 
 ---
 
-## ⚠️ Two WhatsApp Integration Methods
+## 🎯 Choose Your Platform
 
-### Method 1: WhatsApp Business API (RECOMMENDED) ✅
-- **Creates a REAL bot** with its own phone number
-- Users message YOUR BOT, bot responds
-- Official, supported by Meta
-- Requires: Meta Business account + Phone number
-
-### Method 2: WhatsApp Web Bridge (Personal Use)
-- Links YOUR personal WhatsApp (like WhatsApp Web)
-- Bot responds AS YOU (using your number)
-- Unofficial, may break
-- Good for personal/testing use
+| Platform | Setup Time | Difficulty | Cost |
+|----------|-----------|------------|------|
+| **Telegram** | 2 minutes | ⭐ Easy | Free |
+| **WhatsApp Business** | 1-2 days | ⭐⭐⭐ Complex | Pay per message |
+| **WhatsApp Web Bridge** | 10 minutes | ⭐⭐ Medium | Free (unofficial) |
 
 ---
 
-# 🚀 Method 1: WhatsApp Business API Setup (Recommended)
+# 📱 Telegram Bot (EASIEST - Recommended!)
+
+Setup a fully working bot in **2 minutes**. Free forever!
+
+## Quick Start
+
+```bash
+# 1. Install PixieNews with Telegram support
+pip install pixienews[telegram]
+
+# 2. Get your bot token from @BotFather on Telegram
+#    - Open Telegram, search @BotFather
+#    - Send /newbot
+#    - Follow instructions, copy the token
+
+# 3. Run your bot!
+pixienews telegram --token YOUR_BOT_TOKEN
+```
+
+That's it! Open Telegram and send `/start` to your bot.
+
+## Step-by-Step Guide
+
+### Step 1: Create Bot with @BotFather
+1. Open Telegram
+2. Search for `@BotFather`
+3. Send `/newbot`
+4. Choose a name: `My AI News Bot`
+5. Choose a username: `myainews_bot`
+6. Copy the token (looks like: `123456789:ABCdefGHIjklMNOpqrsTUVwxyz`)
+
+### Step 2: Run PixieNews
+```bash
+# Install
+pip install pixienews[telegram]
+
+# Run with token
+pixienews telegram --token "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+
+# Or use environment variable
+export TELEGRAM_BOT_TOKEN="your_token"
+pixienews telegram
+```
+
+### Step 3: Test Your Bot
+1. Open Telegram
+2. Search for your bot username
+3. Send `/start`
+4. Try: `US`, `/news`, `/search OpenAI`
+
+---
+
+# 💬 WhatsApp Business API
+
+Official WhatsApp bot with its own phone number. Requires Meta Business account.
 
 This creates a **real WhatsApp bot** that users can add and message.
 
